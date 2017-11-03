@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <title>Лабораторная №4</title>
+    <link href="style.css" rel="stylesheet" type="text/css"/>
+    <link rel="icon" href="images/favicon.ico"/>
+    <script type="text/javascript" src="vue.js"></script>
+    <script type="text/javascript" src="jquery-3.2.1.js"></script>
+</head>
+
+<body class = "alive" link="yellow" id="main">
+            <table class = "form" id="check">
+                <tr>
+                    <td><label for="field_x">X[-5;5]</label></td>
+                    <td><input v-on:keypress="entered('field_x', $event)"  name="x" id="field_x" /></td>
+                </tr>
+                <tr>
+                    <td><label for="field_y">Y[-3;3]</label></td>
+                    <td><input v-on:keypress="entered('field_y', $event)" name="y" id="field_y" /></td>
+                </tr>
+                <tr>
+                    <td><label for="field_r">R[0;5]</label></td>
+                    <td><input v-on:keypress="entered('field_r', $event)" name="r" id="field_r" /></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button class="form" style="color: yellow" @mousedown="checkSummary($event)" id="accept" >Принять</button>
+                        <button class="form" style="color: yellow" @mousedown="remove" >Удалить все элементы</button>
+                        <button class="form" style="color: yellow" @mousedown="out">Выйти из аккаунта</button>
+                    </td>
+                </tr>
+            </table>
+            <canvas width='830' height="620" id='example' v-on:click="drawDot" class="rightpic"></canvas>
+            <table style='border-radius: 5px;' border="2" bordercolor="yellow" id="resultTable">
+                <tr><td>X</td> <td>Y</td> <td> R </td> <td>Result</td></tr>
+            </table>
+        <script type="text/javascript">
+            new Vue({
+                el: "#example",
+                mounted(){
+                    this.getTable();
+                    var r;
+                    var out;
+                    if(document.getElementById('field_r').value<1||document.getElementById('field_r').value>4){
+                        table = document.getElementById('resultTable');
+                        if(table.rows.length-1) {
+                            r = table.rows[table.rows.length - 1].lastChild.previousSibling.innerHTML;
+                            document.getElementById('field_r').value = r;
+                            out = r;
+                        }
+                        else {
+                            r = 2.5;
+                            out = 'R';
+                        }
+                    }
+                    else {
+                        r = document.getElementById('field_r').value;
+                        out = r;
+                    }
+                    var example = document.getElementById("example");
+                    var ctx = example.getContext('2d');
+                    ctx.fillStyle = "cadetblue";
+                    ctx.fillRect(0, 0, example.width, example.height);
+                    //Фигуры
+                    ctx.fillStyle = "red";
+                    ctx.fillRect(example.width/2-r*50, example.height/2-r*25, r*50, r*25);
+                    ctx.beginPath();
+                    ctx.moveTo(example.width/2-r*50,example.height/2);
+                    ctx.lineTo(example.width/2,example.height/2+r*50);
+                    ctx.lineTo(example.width/2,example.height/2);
+                    ctx.fill();
+                    ctx.arc(example.width/2, example.height/2, r*50, 1/2 * Math.PI, 0, true);
+                    ctx.fill();
+
+                    // Координатные оси
+                    ctx.strokeStyle = "yellow";
+                    ctx.beginPath();
+                    ctx.moveTo(example.width/2, 10);
+                    ctx.lineTo(example.width/2,example.height-10);
+                    ctx.moveTo(example.width/2, 10);
+                    ctx.lineTo(example.width/2+5,15);
+                    ctx.moveTo(example.width/2, 10);
+                    ctx.lineTo(example.width/2-5,15);
+                    //
+                    ctx.moveTo(10, example.height/2);
+                    ctx.lineTo(example.width-10,example.height/2);
+                    ctx.moveTo(example.width-10, example.height/2);
+                    ctx.lineTo(example.width-15,example.height/2-5);
+                    ctx.moveTo(example.width-10, example.height/2);
+                    ctx.lineTo(example.width-15,example.height/2+5);
+                    //
+                    ctx.moveTo(example.width/2-r*25,example.height/2-5);
+                    ctx.lineTo(example.width/2-r*25,example.height/2+5);
+                    ctx.moveTo(example.width/2+r*25,example.height/2-5);
+                    ctx.lineTo(example.width/2+r*25,example.height/2+5);
+                    ctx.moveTo(example.width/2-5,example.height/2-r*25);
+                    ctx.lineTo(example.width/2+5,example.height/2-r*25);
+                    ctx.moveTo(example.width/2-5,example.height/2+r*25);
+                    ctx.lineTo(example.width/2+5,example.height/2+r*25);
+                    //
+                    ctx.moveTo(example.width/2-r*50,example.height/2-5);
+                    ctx.lineTo(example.width/2-r*50,example.height/2+5);
+                    ctx.moveTo(example.width/2+r*50,example.height/2-5);
+                    ctx.lineTo(example.width/2+r*50,example.height/2+5);
+                    ctx.moveTo(example.width/2-5,example.height/2-r*50);
+                    ctx.lineTo(example.width/2+5,example.height/2-r*50);
+                    ctx.moveTo(example.width/2-5,example.height/2+r*50);
+                    ctx.lineTo(example.width/2+5,example.height/2+r*50);
+                    //
+                    ctx.font = '10px "Tahoma"';
+                    ctx.fillStyle = "black";
+                    ctx.fillText("-" + out,example.width/2-r*50,example.height/2+15);
+                    ctx.fillText("-" + out + "/2", example.width/2-r*25,example.height/2+15);
+                    ctx.fillText(out + "/2", example.width/2+r*25,example.height/2+15);
+                    ctx.fillText(out,  example.width/2+r*50,example.height/2+15);
+                    //
+                    ctx.fillText( out,example.width/2+5,example.height/2-r*50);
+                    ctx.fillText(out + "/2", example.width/2+5,example.height/2-r*25);
+                    ctx.fillText("-" + out + "/2", example.width/2+5,example.height/2+r*25);
+                    ctx.fillText("-" + out, example.width/2+5,example.height/2+r*50);
+                    ctx.stroke();
+                    var table = document.getElementById('resultTable');
+                    if(table.rows.length-1)
+                        this.drawDotOnLoad(table.rows[table.rows.length-1].firstChild.innerHTML,table.rows[table.rows.length-1].firstChild.nextSibling.innerHTML,table.rows[table.rows.length-1].lastChild.innerHTML);
+                },
+                methods: {
+                    draw : function() {
+                        var r;
+                        if(document.getElementById('field_r').value>4||document.getElementById('field_r').value<1) {
+                            r = 3;
+                            document.getElementById('field_r').value = 3;
+                        }
+                        else r = document.getElementById('field_r').value;
+                        var example = document.getElementById("example");
+                        var ctx = example.getContext('2d');
+                        ctx.fillStyle = "cadetblue";
+                        ctx.fillRect(0, 0, example.width, example.height);
+                        //Фигуры
+                        ctx.fillStyle = "red";
+                        ctx.fillRect(example.width/2-r*50, example.height/2-r*25, r*50, r*25);
+                        ctx.beginPath();
+                        ctx.moveTo(example.width/2-r*50,example.height/2);
+                        ctx.lineTo(example.width/2,example.height/2+r*50);
+                        ctx.lineTo(example.width/2,example.height/2);
+                        ctx.fill();
+                        ctx.arc(example.width/2, example.height/2, r*50, 1/2 * Math.PI, 0, true);
+                        ctx.fill();
+
+                        // Координатные оси
+                        ctx.strokeStyle = "yellow";
+                        ctx.beginPath();
+                        ctx.moveTo(example.width/2, 10);
+                        ctx.lineTo(example.width/2,example.height-10);
+                        ctx.moveTo(example.width/2, 10);
+                        ctx.lineTo(example.width/2+5,15);
+                        ctx.moveTo(example.width/2, 10);
+                        ctx.lineTo(example.width/2-5,15);
+                        //
+                        ctx.moveTo(10, example.height/2);
+                        ctx.lineTo(example.width-10,example.height/2);
+                        ctx.moveTo(example.width-10, example.height/2);
+                        ctx.lineTo(example.width-15,example.height/2-5);
+                        ctx.moveTo(example.width-10, example.height/2);
+                        ctx.lineTo(example.width-15,example.height/2+5);
+                        //
+                        ctx.moveTo(example.width/2-r*25,example.height/2-5);
+                        ctx.lineTo(example.width/2-r*25,example.height/2+5);
+                        ctx.moveTo(example.width/2+r*25,example.height/2-5);
+                        ctx.lineTo(example.width/2+r*25,example.height/2+5);
+                        ctx.moveTo(example.width/2-5,example.height/2-r*25);
+                        ctx.lineTo(example.width/2+5,example.height/2-r*25);
+                        ctx.moveTo(example.width/2-5,example.height/2+r*25);
+                        ctx.lineTo(example.width/2+5,example.height/2+r*25);
+                        //
+                        ctx.moveTo(example.width/2-r*50,example.height/2-5);
+                        ctx.lineTo(example.width/2-r*50,example.height/2+5);
+                        ctx.moveTo(example.width/2+r*50,example.height/2-5);
+                        ctx.lineTo(example.width/2+r*50,example.height/2+5);
+                        ctx.moveTo(example.width/2-5,example.height/2-r*50);
+                        ctx.lineTo(example.width/2+5,example.height/2-r*50);
+                        ctx.moveTo(example.width/2-5,example.height/2+r*50);
+                        ctx.lineTo(example.width/2+5,example.height/2+r*50);
+                        //Числа под графиком
+                        ctx.font = '10px "Tahoma"';
+                        ctx.fillStyle = "black";
+                        ctx.fillText("-" + r,example.width/2-r*50,example.height/2+15);
+                        ctx.fillText("-" + r + "/2", example.width/2-r*25,example.height/2+15);
+                        ctx.fillText(r + "/2", example.width/2+r*25,example.height/2+15);
+                        ctx.fillText(r,  example.width/2+r*50,example.height/2+15);
+                        //
+                        ctx.fillText(r,example.width/2+5,example.height/2-r*50);
+                        ctx.fillText(r + "/2", example.width/2+5,example.height/2-r*25);
+                        ctx.fillText("-" + r + "/2", example.width/2+5,example.height/2+r*25);
+                        ctx.fillText("-" + r, example.width/2+5,example.height/2+r*50);
+                        ctx.stroke();
+                    },
+                    getTable : function () {
+                        var bool = true;
+                        $.get( "rest/main/getTable", function( data ) {
+                            if(Number(data)!==0) {
+                                $("#resultTable").html(data);
+                            }
+                            else {
+                                bool = false;
+                                alert("Вы не авторизованы!");
+                                top.location.href = "index.html";
+                            }
+                        });
+                        if(bool) {
+                            setTimeout(this.getTable, 100);
+                            setTimeout(this.draw, 100);
+                        }
+                    },
+                drawDot : function() {
+                    if(document.getElementById('field_r').value>4||document.getElementById('field_r').value<1) {
+                        alert("Неверное значение r!");
+                        return;
+                    }
+                    this.draw();
+                    var example = document.getElementById("example");
+                    var x = (-example.width/2 + event.clientX-525)/50;
+                    var y = (example.height/2 - event.clientY+10)/50;
+                    var R = document.getElementById('field_r').value;
+                    var ctx = example.getContext('2d');
+                    if(x<=0&&x>=-R&&y>=0&&y<=(R/2)){
+                        ctx.fillStyle = "green";
+                    }
+                    else if(x<=0&&y<=0&&-y-x<=R){
+                        ctx.fillStyle = "green";
+                    }
+                    else if(x>=0&&y<=0&&y*y+x*x<=R*R){
+                        ctx.fillStyle = "green";;
+                    }
+                    else
+                        ctx.fillStyle = "yellow";
+                    ctx.beginPath();
+                    ctx.arc(event.clientX-525+13 , event.clientY-10, 3, 2*Math.PI, 0, true);
+                    ctx.fill();
+                    document.getElementById('field_x').value = x;
+                    document.getElementById('field_y').value = y;
+                },
+
+                drawDotOnLoad : function(x,y,inArea) {
+                    var example = document.getElementById("example");
+                    var clientX = x*50+example.width/2;
+                    var clientY = -y*50+example.height/2;
+                    var ctx = example.getContext('2d');
+                    if(inArea==='true'){
+                        ctx.fillStyle = "green";
+                    }
+                    else
+                        ctx.fillStyle = "yellow";
+                    ctx.beginPath();
+                    ctx.arc(clientX , clientY, 3, 2*Math.PI, 0, true);
+                    ctx.fill();
+                }
+                }
+            });
+            new Vue({
+                el: "#check",
+                methods: {
+                    entered : function(name, $event) {
+                        var bool =  ((String(document.getElementById(name).value).length<18)&&(event.keyCode>47)&&(event.keyCode<58)||((event.keyCode===45)&&(document.getElementById(name).value!=='-')&&(document.getElementById(name).value===''))||((event.keyCode===46)&&(document.getElementById(name).value!==''&&document.getElementById(name).value!=='-')&&(!String(document.getElementById(name).value).includes('.'))));
+                        if(!bool)
+                            $event.preventDefault();
+                    },
+                    checkSummary : function($event) {
+                        var x = document.getElementById('field_x').value;
+                        var y = document.getElementById('field_y').value;
+                        var r = document.getElementById('field_r').value;
+                        if(x===""){
+                            alert("Вы не ввели значение для x!");
+                            $event.preventDefault();
+                            return;
+                        }if(x>5 || x <-5){
+                            alert("Вы ввели неверное значение для x!");
+                            $event.preventDefault();
+                            return;
+                        }
+
+                        if(y===""){
+                            alert("Вы не ввели значение для y!");
+                            $event.preventDefault();
+                            return;
+                        }
+                        if(y>3 || y <-3){
+                            alert("Вы ввели неверное значение для y!");
+                            $event.preventDefault();
+                            return;
+                        }
+                        if(r===""){
+                            alert("Вы не ввели значение для r!");
+                            $event.preventDefault();
+                            return;
+                        }
+                        if(r>5 || r<0){
+                            alert("Вы ввели неверное значение для r!");
+                            $event.preventDefault();
+                        }
+                        $.post( "rest/main/newPoint?x="+$('#field_x').val()+"&y="+$('#field_y').val()+"&r="+$('#field_r').val(), function( data ) {});
+                },
+                remove : function () {
+                    $.post( "rest/main/removeTable", function( data ) {
+                    });
+                },
+                out : function (){
+                    $.post("rest/main/out");
+                    top.location.href = "index.html";
+                }
+            }});
+        </script>
+</body>
+</html>

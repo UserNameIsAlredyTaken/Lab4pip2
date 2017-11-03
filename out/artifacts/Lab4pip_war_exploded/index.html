@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Лабораторная №4</title>
+        <meta charset="utf-8">
+        <link href="style.css" rel="stylesheet" type="text/css"/>
+        <link rel="icon" href="images/favicon.ico"/>
+        <script src="jquery-3.2.1.js"></script>
+        <script src="vue.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+
+    <body class = "alive" link="yellow">
+            <h1 class="centered" style="color: blue;" >Стартовая страница</h1>
+            <div class="form centered" style="width: 200px" align="center" id="time">
+                Дата и время
+                <div id='datetime'>
+                    {{time}}
+                    <!--<script>-->
+                        <!--updateTime();-->
+                        <!--function updateTime() {-->
+                            <!--let dateContainer = document.getElementById('datetime');-->
+                            <!--dateContainer.innerHTML = new Date().toLocaleString();-->
+                            <!--setTimeout('updateTime()', 1000);-->
+                        <!--}-->
+                    <!--</script>-->
+                </div>
+                        <label for="login" style="padding-left: 26px"> login:</label>
+                        <input v-model="login" required name="login" id="login" class="login_button"/>
+                        <label for="password">password:</label>
+                        <input v-model="password" required type="password" name="password" id="password" class="login_button"/>
+                        <div class="changeLocation">
+                            <button class="form" v-on:click="send" style="color: yellow">Войти</button>
+                            <button class="form" v-on:click="newUser" style="color: yellow">Зарегистрироваться</button>
+                        </div>
+            </div>
+            <script>
+                new Vue ({
+                    el: "#time",
+                    data: {
+                        password: '',
+                        login: '',
+                        time: ''
+                    },
+                    mounted() {
+                        this.updateTime();
+                    },
+                    methods: {
+                        send: function(){
+                            if(this.login.length!==0&&this.password.length!==0) {
+                                $.post("rest/main", {login: this.login, password: this.password})
+                                    .done(function (response) {
+                                        if (Number(response) % 2) {
+                                            top.location.href = "main.html";
+                                            return;
+                                        }
+                                        if (Number(response)) {
+                                            alert("Неправильный пароль!");
+                                        }
+                                        else {
+                                            alert("Неправильный логин!");
+                                        }
+                                    });
+                            }
+                            else{
+                                if(this.login.length===0)
+                                    alert("Введите логин!");
+                                else{
+                                    alert("Введите пароль!");
+                                }
+                            }
+                        },
+                        newUser: function(){
+                            if(this.login.length>=5&&this.password.length>=5) {
+                                $.post("rest/main/registration", {login: this.login, password: this.password})
+                                    .done(function (data) {
+                                        top.location.href = "main.html";})
+                            }
+                            else{
+                                if(this.login.length<=5)
+                                    alert("Логин не меньше 5 символов!");
+                                else{
+                                    alert("Пароль не меньше 5 символов!");
+                                }
+                            }
+                        },
+                        updateTime : function () {
+                            this.time = new Date().toLocaleString();
+                            setTimeout(this.updateTime, 1000);
+                        }
+                    }
+                })
+            </script>
+            <div align="center" class="editor editor_VB">Влад Беспалов<br/> гр.P3211</div>
+            <div align="center" class="editor editor_DT">Данил Татаринов<br/>  гр.P3211</div>
+    </body>
+</html>
